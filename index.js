@@ -41,8 +41,12 @@ function start() {
     analyser.getByteTimeDomainData(timeArray);
     console.log(timeArray);
 
+    // Idea to try is to render into shader and move "sand particles" using the force
+    // of the sound waves. This would be a cool effect to try out.
+    wfCanvasCtx.globalAlpha = 0.01;
     wfCanvasCtx.fillStyle = "rgb(200 200 200)";
     wfCanvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+    wfCanvasCtx.globalAlpha = 0.5;
     wfCanvasCtx.lineWidth = 2;
     wfCanvasCtx.strokeStyle = "rgb(0 0 0)";
     wfCanvasCtx.beginPath();
