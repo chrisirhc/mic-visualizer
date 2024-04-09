@@ -1,9 +1,11 @@
 {
   "name": "messing-with-mic",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "main": "index.js",
+  "module": "index.js",
   "scripts": {
+    "start": "wds --open demo/ --node-resolve --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
