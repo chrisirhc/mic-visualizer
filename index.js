@@ -1,3 +1,5 @@
+import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
+
 // Maybe use mjs?
 const canvas = document.getElementById("oscilloscope");
 const canvasCtx = canvas.getContext("2d");
@@ -13,7 +15,7 @@ function start() {
   const analyser = audioCtx.createAnalyser();
   // analyser.fftSize = 256;
   const bufferLength = analyser.frequencyBinCount;
-  const freqArray = new Uint8Array(bufferLength);
+  const freqArrays = [new Uint8Array(bufferLength), new Uint8Array(bufferLength)];
   const timeArrays = [new Uint8Array(bufferLength), new Uint8Array(bufferLength)];
   let timeArrayIndex = 0;
 
@@ -23,7 +25,7 @@ function start() {
       // `microphone` can now act like any other AudioNode
 
       microphone.connect(analyser);
-      analyser.getByteFrequencyData(freqArray);
+      analyser.getByteFrequencyData(freqArrays[timeArrayIndex]);
       analyser.getByteTimeDomainData(timeArrays[timeArrayIndex]);
 
       draw();
@@ -41,7 +43,9 @@ function start() {
   function draw() {
     requestAnimationFrame(draw);
 
+    const freqArray = freqArrays[timeArrayIndex];
     const timeArray = timeArrays[timeArrayIndex];
+    const prevFreqArray = freqArrays[timeArrayIndex === 0 ? 1 : 0];
     const prevTimeArray = timeArrays[timeArrayIndex === 0 ? 1 : 0]
     analyser.getByteFrequencyData(freqArray);
     analyser.getByteTimeDomainData(timeArray);
@@ -71,14 +75,16 @@ function start() {
     for (let i = 0; i < bufferLength; i++) {
       const v = freqArray[i] / 255.0;
       const v2 = timeArray[i] / 128.0;
-      const y = (v * canvas.height) / 2;
+      const y = canvas.height - (v * canvas.height);
       const y2 = (v2 * canvas.height) / 2;
-      // console.log(timeArray[i] - prevTimeArray[i], timeArray[i], prevTimeArray[i]);
-      wfCanvasCtx.strokeStyle = `rgb(${
-        (timeArray[i] - prevTimeArray[i] + 128.0) / 128.0 * 255
-      } ${
-        Math.abs(timeArray[i] - prevTimeArray[i]) / 128.0 * 255
-      } 122)`;
+
+      const dV = (freqArray[i] - prevFreqArray[i] + 64.0) / 128.0;
+      if (dV) console.log(dV, freqArray[i], prevFreqArray[i]);
+      const freqColor = d3.interpolateRdYlGn(dV);
+      canvasCtx.strokeStyle = freqColor;
+      const dV2 = (timeArray[i] - prevTimeArray[i] + 128.0) / 255.0;
+      // if (dV2) console.log(dV2, timeArray[i], prevTimeArray[i]);
+      wfCanvasCtx.strokeStyle = d3.interpolateRdYlGn(dV2);
 
       if (i === 0) {
         canvasCtx.moveTo(x, y);
