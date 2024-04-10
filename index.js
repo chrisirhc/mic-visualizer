@@ -79,7 +79,7 @@ function start() {
       const y2 = (v2 * canvas.height) / 2;
 
       const dV = (freqArray[i] - prevFreqArray[i] + 64.0) / 128.0;
-      if (dV) console.log(dV, freqArray[i], prevFreqArray[i]);
+      // if (dV) console.log(dV, freqArray[i], prevFreqArray[i]);
       const freqColor = d3.interpolateRdYlGn(dV);
       canvasCtx.strokeStyle = freqColor;
       const dV2 = (timeArray[i] - prevTimeArray[i] + 128.0) / 255.0;
