@@ -40,6 +40,9 @@ function start() {
     console.error('unable to access media devices')
   }
 
+  const freqDiffColorScale = d3.scaleSequential(d3.interpolateRdYlGn).domain([-255.0, 255.0]);
+  const timeDiffColorScale = d3.scaleSequential(d3.interpolateRdYlGn).domain([-255.0, 255.0]);
+
   function draw() {
     requestAnimationFrame(draw);
 
@@ -47,8 +50,11 @@ function start() {
     const timeArray = timeArrays[timeArrayIndex];
     const prevFreqArray = freqArrays[timeArrayIndex === 0 ? 1 : 0];
     const prevTimeArray = timeArrays[timeArrayIndex === 0 ? 1 : 0]
+    // freq is in the domain 0-255
     analyser.getByteFrequencyData(freqArray);
     analyser.getByteTimeDomainData(timeArray);
+    // console.log('freq', 'min', d3.min(freqArray), 'max', d3.max(freqArray));
+    // console.log('time', 'min', d3.min(timeArray), 'max', d3.max(timeArray));
 
     // Idea to try is to render into shader and move "sand particles" using the force
     // of the sound waves. This would be a cool effect to try out.
@@ -78,13 +84,12 @@ function start() {
       const y = canvas.height - (v * canvas.height);
       const y2 = (v2 * canvas.height) / 2;
 
-      const dV = (freqArray[i] - prevFreqArray[i] + 64.0) / 128.0;
+      const dV = freqArray[i] - prevFreqArray[i];
       // if (dV) console.log(dV, freqArray[i], prevFreqArray[i]);
-      const freqColor = d3.interpolateRdYlGn(dV);
-      canvasCtx.strokeStyle = freqColor;
-      const dV2 = (timeArray[i] - prevTimeArray[i] + 128.0) / 255.0;
+      canvasCtx.strokeStyle = freqDiffColorScale(dV);
+      const dV2 = timeArray[i] - prevTimeArray[i];
       // if (dV2) console.log(dV2, timeArray[i], prevTimeArray[i]);
-      wfCanvasCtx.strokeStyle = d3.interpolateRdYlGn(dV2);
+      wfCanvasCtx.strokeStyle = timeDiffColorScale(dV2);
 
       if (i === 0) {
         canvasCtx.moveTo(x, y);
